@@ -1,0 +1,9 @@
+package io.playground.orderservice.infrastructure.persistence.eventstream;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface OutboxJpaRepository extends JpaRepository<OutboxEntity, String> {
+    List<OutboxEntity> findAllByProcessedFalse();
+}

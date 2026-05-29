@@ -1,0 +1,51 @@
+### 주문 API
+POST http://localhost:8083/order?userId=1
+Content-Type: application/json
+
+{
+  "orderExternalId": "order-234",
+  "variantQuantities": {
+    "1": 2,
+    "2": 1
+  }
+}
+
+### 결제 승인 요청 API
+POST http://localhost:8083/order/payment
+Content-Type: application/json
+
+{
+  "idempotencyKey": "order-123-idem",
+  "orderExternalId": "order-123",
+  "paymentKey": "payment-123",
+  "amount": 62700
+}
+
+### 주문번호로 주문 조회 API
+GET http://localhost:8083/order?orderExternalId=order-123
+
+### 주문 전체취소 API
+POST http://localhost:8083/order/cancel
+Content-Type: application/json
+
+{
+  "idempotencyKey": "order-123-idem-cancel",
+  "orderExternalId": "order-123",
+  "paymentKey": "payment-123",
+  "reason": "고객 요청"
+}
+
+### 주문 부분취소 API
+POST http://localhost:8083/order/partial-cancel
+Content-Type: application/json
+
+{
+  "idempotencyKey": "order-123-idem-partial2",
+  "orderExternalId": "order-123",
+  "paymentKey": "payment-123",
+  "variantQuantities": {
+    "1": 1,
+    "2": 1
+  },
+  "reason": "고객 요청"
+}

@@ -1,0 +1,111 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DB_ORDER}?rewriteBatchedStatements=true
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    hibernate:
+      ddl-auto: ${JPA_HIBERNATE_DDL-AUTO}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        order_updates: true
+    defer-datasource-initialization: true
+
+  batch:
+    jdbc:
+      initialize-schema: ${BATCH_JDBC_INITIALIZE_SCHEMA}
+      platform: mysql
+    job:
+      enabled: true
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE}
+      data-locations: classpath:data.sql
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      batch-size: 16384                  # 16KB
+      buffer-memory: 33554432            # 32MB
+      compression-type: snappy
+      properties:
+        enable.idempotence: true
+        max.in.flight.requests.per.connection: 5
+        linger.ms: 10
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+    consumer:
+      group-id: inventory-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      enable-auto-commit: false
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      properties:
+        isolation.level: read_committed
+        spring.json.trusted.packages: "io.playground.*"
+        max.poll.interval.ms: 300000
+        session.timeout.ms: 45000
+        heartbeat.interval.ms: 3000
+    listener:
+      ack-mode: manual
+      concurrency: 1
+      type: single
+      poll-timeout: 3000
+      auto-startup: true
+
+  management:
+    endpoints:
+      web:
+        exposure:
+          include: health,prometheus,metrics
+    metrics:
+      distribution:
+        percentiles-histogram:
+          http:
+            server:
+              requests: true
+
+api:
+  internal:
+    catalog-service:
+      url: ${CATALOG_URL}
+    inventory-service:
+      url: ${INVENTORY_URL}
+    payment-service:
+      url: ${PAYMENT_URL}
+
+logging:
+  level:
+    root: INFO
+    io.playground: DEBUG
+
+    org.springframework.jdbc.core: DEBUG
+    org.springframework.jdbc.core.StatementCreatorUtils: TRACE
+
+    org.hibernate.SQL: DEBUG
+    org.hibernate.orm.jdbc.bind: TRACE
+
+    org.apache.kafka: WARN
+    org.springframework.kafka: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
