@@ -12,7 +12,12 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "outboxes")
+@Table(
+        name = "outboxes"
+//        indexes = {
+//                @Index(name = "idx_processed", columnList = "processed")
+//        }
+)
 public class OutboxEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

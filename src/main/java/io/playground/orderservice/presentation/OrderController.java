@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/order")
 @RequiredArgsConstructor
 public class OrderController {
     private final ProcessSagaService orderSagaService;
@@ -19,7 +18,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<Void> doOrder(@RequestParam Long userId,
-                                         @RequestBody OrderDto.DoOrderRequest request) {
+                                        @RequestBody OrderDto.DoOrderRequest request) {
         orderSagaService.processOrder(
                 userId,
                 request.orderExternalId(),
