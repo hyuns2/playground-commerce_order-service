@@ -85,11 +85,11 @@ spring:
 api:
   internal:
     catalog-service:
-      url: ${CATALOG_HOST}:${CATALOG_PORT}/catalog/client
+      url: http://${CATALOG_HOST}:${CATALOG_PORT}/client
     inventory-service:
-      url: ${INVENTORY_HOST}:${INVENTORY_PORT}/inventory/client
+      url: http://${INVENTORY_HOST}:${INVENTORY_PORT}/client
     payment-service:
-      url: ${PAYMENT_HOST}:${PAYMENT_PORT}/payment/client
+      url: http://${PAYMENT_HOST}:${PAYMENT_PORT}/client
 
 logging:
   level:
