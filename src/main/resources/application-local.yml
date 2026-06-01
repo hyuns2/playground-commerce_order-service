@@ -73,18 +73,6 @@ spring:
       poll-timeout: 3000
       auto-startup: true
 
-  management:
-    endpoints:
-      web:
-        exposure:
-          include: health,prometheus,metrics
-    metrics:
-      distribution:
-        percentiles-histogram:
-          http:
-            server:
-              requests: true
-
 api:
   internal:
     catalog-service:
@@ -109,3 +97,22 @@ logging:
     org.springframework.kafka: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    prometheus:
+      access: unrestricted
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
