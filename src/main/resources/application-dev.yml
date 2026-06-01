@@ -23,7 +23,10 @@ spring:
 
   batch:
     jdbc:
-      initialize-schema: always
+      initialize-schema: ${BATCH_JDBC_INITIALIZE_SCHEMA}
+      platform: mysql
+    job:
+      enabled: true
 
   sql:
     init:
