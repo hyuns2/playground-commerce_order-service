@@ -225,8 +225,8 @@ public class ProcessStepService {
             return;
 
         switch (saga.getStatus()) {
-            case STOCKS_CONFIRMED, PAYMENT_COMPLETED, ORDER_CREATED:
-                // 결제 취소
+            case STOCKS_CONFIRMED, PAYMENT_COMPLETED, ORDER_CREATED, STOCKS_RESERVED:
+                // 결제 존재할 경우, 취소
                 if (saga.getPaymentKey() != null)
                     try {
                         paymentClient.cancelPayment(
@@ -242,6 +242,9 @@ public class ProcessStepService {
                                 jsonUtil.toJson(BusinessErrorDto.from(e))
                         );
                     }
+
+                // 주문 존재할 경우, 취소
+                orderService.failOrder(saga.getOrderExternalId());
             default:
                 // 재고 처리 & 알림
                 eventProducer.produce(
@@ -252,10 +255,14 @@ public class ProcessStepService {
                         idempotencyKey
                 );
 
-                // 주문 실패 처리
-                if (orderService.failOrder(
-                        saga.getOrderExternalId()
-                ))
+                // 사가 상태 업데이트
+                if (
+                        sagaPersistence.updateStatus(
+                                saga.getOrderExternalId(),
+                                ProcessSaga.ProcessSagaStatus.FAILED,
+                                saga.getStatus()
+                        )
+                )
                     saga.updateStatus(
                             ProcessSaga.ProcessSagaStatus.FAILED);
                 else

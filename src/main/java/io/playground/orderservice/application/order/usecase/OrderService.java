@@ -135,7 +135,10 @@ public class OrderService {
         return orderPersistence.updateStatusByExternalId(
                 orderExternalId,
                 Order.OrderStatus.FAILED,
-                List.of(Order.OrderStatus.CREATED)
+                List.of(
+                        Order.OrderStatus.CREATED,
+                        Order.OrderStatus.PAID
+                )
         );
     }
 }
