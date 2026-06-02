@@ -7,20 +7,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.ExecutionException;
-
 @Component
 @RequiredArgsConstructor
 public class KafkaProducer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final JsonUtil jsonUtil;
 
-    public void produce(OutboxEntity event) throws ExecutionException, InterruptedException {
+    public void produce(OutboxEntity event) {
         kafkaTemplate.send(
                 "order.events",
                 jsonUtil.toJson(
                         EventEnvelope.from(event)
                 )
-        ).get();
+        );
     }
 }
