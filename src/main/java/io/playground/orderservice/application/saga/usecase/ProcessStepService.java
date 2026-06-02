@@ -227,20 +227,21 @@ public class ProcessStepService {
         switch (saga.getStatus()) {
             case STOCKS_CONFIRMED, PAYMENT_COMPLETED, ORDER_CREATED:
                 // 결제 취소
-                try {
-                    paymentClient.cancelPayment(
-                            ClientDto.CancelPaymentRequest.builder()
-                                    .idempotencyKey(idempotencyKey)
-                                    .paymentKey(saga.getPaymentKey())
-                                    .reason("Failed to process order")
-                                    .build()
-                    );
-                } catch (BusinessDetailException e) {
-                    throw new BusinessDetailException(
-                            BusinessErrorCode.PAYMENT_SERVICE_FAILED,
-                            jsonUtil.toJson(BusinessErrorDto.from(e))
-                    );
-                }
+                if (saga.getPaymentKey() != null)
+                    try {
+                        paymentClient.cancelPayment(
+                                ClientDto.CancelPaymentRequest.builder()
+                                        .idempotencyKey(idempotencyKey)
+                                        .paymentKey(saga.getPaymentKey())
+                                        .reason("Failed to process order")
+                                        .build()
+                        );
+                    } catch (BusinessDetailException e) {
+                        throw new BusinessDetailException(
+                                BusinessErrorCode.PAYMENT_SERVICE_FAILED,
+                                jsonUtil.toJson(BusinessErrorDto.from(e))
+                        );
+                    }
             default:
                 // 재고 처리 & 알림
                 eventProducer.produce(
