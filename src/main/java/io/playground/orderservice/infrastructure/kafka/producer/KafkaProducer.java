@@ -16,6 +16,7 @@ public class KafkaProducer {
     public void produce(OutboxEntity event) {
         kafkaTemplate.send(
                 "order.events",
+                event.getEventId(),
                 jsonUtil.toJson(
                         EventEnvelope.from(event)
                 )

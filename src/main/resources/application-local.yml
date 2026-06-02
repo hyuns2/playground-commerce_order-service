@@ -28,10 +28,10 @@ spring:
     job:
       enabled: true
 
-  sql:
-    init:
-      mode: ${SQL_INIT_MODE}
-      data-locations: classpath:data.sql
+#  sql:
+#    init:
+#      mode: ${SQL_INIT_MODE}
+#      data-locations: classpath:data.sql
 
   data:
     redis:
@@ -49,6 +49,7 @@ spring:
       compression-type: snappy
       properties:
         enable.idempotence: true
+        partitioner.class: org.apache.kafka.clients.producer.RoundRobinPartitioner
         max.in.flight.requests.per.connection: 5
         linger.ms: 10
         delivery.timeout.ms: 120000

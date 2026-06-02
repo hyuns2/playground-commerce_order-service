@@ -1,5 +1,5 @@
 ### 주문 API
-POST http://localhost:8083/order?userId=1
+POST http://localhost:8083/?userId=1
 Content-Type: application/json
 
 {
@@ -11,7 +11,7 @@ Content-Type: application/json
 }
 
 ### 결제 승인 요청 API
-POST http://localhost:8083/order/payment
+POST http://localhost:8083/payment
 Content-Type: application/json
 
 {
