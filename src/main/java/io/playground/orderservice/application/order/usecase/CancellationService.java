@@ -154,7 +154,7 @@ public class CancellationService {
                 .map(oi -> oi.getPrice()
                         .multiply(
                                 BigDecimal.valueOf(
-                                        variantQuantities.get(oi.getId())
+                                        variantQuantities.get(oi.getVariantId())
                                 )
                         )
                 ).reduce(BigDecimal.ZERO, BigDecimal::add);
