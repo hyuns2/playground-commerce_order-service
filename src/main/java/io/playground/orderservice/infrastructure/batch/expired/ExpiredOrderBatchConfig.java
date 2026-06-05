@@ -1,6 +1,7 @@
 package io.playground.orderservice.infrastructure.batch.expired;
 
 import io.playground.orderservice.domain.saga.ProcessSaga;
+import io.playground.orderservice.exception.BusinessDetailException;
 import io.playground.orderservice.infrastructure.batch.common.BatchWriter;
 import io.playground.orderservice.infrastructure.persistence.saga.ProcessSagaEntity;
 import lombok.RequiredArgsConstructor;
@@ -43,9 +44,12 @@ public class ExpiredOrderBatchConfig {
                 .processor(processor)
                 .writer(batchWriter)
                 .faultTolerant()
+
                 .retry(Exception.class)
+                .noRetry(BusinessDetailException.class)
                 .retryLimit(3)
-                .skip(Exception.class)
+
+                .skip(BusinessDetailException.class)
                 .skipLimit(3)
                 .build();
     }

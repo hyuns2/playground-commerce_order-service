@@ -1,6 +1,7 @@
 package io.playground.orderservice.infrastructure.batch.outbox;
 
 import io.playground.orderservice.application.eventstream.OrderEvent;
+import io.playground.orderservice.exception.BusinessDetailException;
 import io.playground.orderservice.infrastructure.persistence.eventstream.OutboxEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
@@ -43,9 +44,12 @@ public class OutboxBatchConfig {
                 .processor(processor)
                 .writer(outboxWriter())
                 .faultTolerant()
+
                 .retry(Exception.class)
+                .noRetry(BusinessDetailException.class)
                 .retryLimit(3)
-                .skip(Exception.class)
+
+                .skip(BusinessDetailException.class)
                 .skipLimit(3)
                 .build();
     }
