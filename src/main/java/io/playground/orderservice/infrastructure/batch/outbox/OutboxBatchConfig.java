@@ -9,8 +9,6 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.database.JdbcPagingItemReader;
 import org.springframework.batch.item.database.Order;
 import org.springframework.batch.item.database.support.MySqlPagingQueryProvider;
@@ -27,7 +25,7 @@ public class OutboxBatchConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager platformTransactionManager;
     private final DataSource dataSource;
-    private final OutboxProcessor processor;
+    private final OutboxWriter outboxWriter;
 
     @Bean
     public Job outboxJob() throws Exception {
@@ -39,10 +37,9 @@ public class OutboxBatchConfig {
     @Bean
     public Step outboxStep() throws Exception {
         return new StepBuilder("outboxStep", jobRepository)
-                .<OutboxEntity, OutboxEntity>chunk(1, platformTransactionManager)
+                .<OutboxEntity, OutboxEntity>chunk(10, platformTransactionManager)
                 .reader(outboxReader())
-                .processor(processor)
-                .writer(outboxWriter())
+                .writer(outboxWriter)
                 .faultTolerant()
 
                 .retry(Exception.class)
@@ -50,7 +47,7 @@ public class OutboxBatchConfig {
                 .retryLimit(3)
 
                 .skip(BusinessDetailException.class)
-                .skipLimit(3)
+                .skipLimit(Integer.MAX_VALUE)
                 .build();
     }
 
@@ -93,24 +90,5 @@ public class OutboxBatchConfig {
         queryProvider.setSortKeys(Map.of("id", Order.ASCENDING));
 
         return queryProvider;
-    }
-
-    @Bean
-    public JdbcBatchItemWriter<OutboxEntity> outboxWriter() {
-        JdbcBatchItemWriter<OutboxEntity> writer = new JdbcBatchItemWriter<>();
-
-        writer.setDataSource(dataSource);
-        writer.setSql(
-                "UPDATE outboxes " +
-                "SET processed = true " +
-                "WHERE id = :id"
-        );
-
-        writer.setItemSqlParameterSourceProvider(
-                new BeanPropertyItemSqlParameterSourceProvider<>()
-        );
-        writer.afterPropertiesSet();
-
-        return writer;
     }
 }

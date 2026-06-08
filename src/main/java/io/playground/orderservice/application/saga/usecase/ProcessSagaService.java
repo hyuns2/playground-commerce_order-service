@@ -234,13 +234,7 @@ public class ProcessSagaService {
     )
     public void compensate(String idempotencyKey,
                            ProcessSaga saga) {
-        if (saga.getStatus() ==
-                ProcessSaga.ProcessSagaStatus.STOCKS_CONFIRMED)
-            processStepService.completeOrder(
-                    saga,
-                    saga.getOrderExternalId()
-            );
-        else if (
+        if (
                 saga.getStatus() !=
                         ProcessSaga.ProcessSagaStatus.ORDER_COMPLETED &&
                 saga.getStatus() !=

@@ -46,7 +46,6 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 3
       batch-size: 16384                  # 16KB
       buffer-memory: 33554432            # 32MB
       compression-type: snappy

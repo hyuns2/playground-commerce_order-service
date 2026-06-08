@@ -225,7 +225,7 @@ public class ProcessStepService {
             return;
 
         switch (saga.getStatus()) {
-            case STOCKS_CONFIRMED, PAYMENT_COMPLETED, ORDER_CREATED, STOCKS_RESERVED:
+            case STOCKS_CONFIRMED, PAYMENT_COMPLETED, ORDER_CREATED:
                 // 결제 존재할 경우, 취소
                 if (saga.getPaymentKey() != null)
                     try {
@@ -242,11 +242,11 @@ public class ProcessStepService {
                                 jsonUtil.toJson(BusinessErrorDto.from(e))
                         );
                     }
-
+            case STOCKS_RESERVED:
                 // 주문 존재할 경우, 취소
                 orderService.failOrder(saga.getOrderExternalId());
             default:
-                // 재고 처리 & 알림
+                // 재고 처리
                 eventProducer.produce(
                         OrderEvent.EventType.ORDER_EXPIRED,
                         OrderEvent.OrderExpired.builder()

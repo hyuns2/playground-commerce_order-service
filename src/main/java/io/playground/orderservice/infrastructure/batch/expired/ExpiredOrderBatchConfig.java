@@ -50,7 +50,7 @@ public class ExpiredOrderBatchConfig {
                 .retryLimit(3)
 
                 .skip(BusinessDetailException.class)
-                .skipLimit(3)
+                .skipLimit(Integer.MAX_VALUE)
                 .build();
     }
 
