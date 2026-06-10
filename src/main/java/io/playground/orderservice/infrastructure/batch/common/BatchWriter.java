@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BatchWriter implements ItemWriter<Void> {
     @Override
-    public void write(Chunk<? extends Void> chunk) throws Exception {
+    public void write(Chunk<? extends Void> chunk) {
         return;
     }
 }

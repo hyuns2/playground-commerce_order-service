@@ -194,7 +194,6 @@ public class ProcessSagaService {
                 "PAYMENT_UPDATE_FAILED"
             );
 
-
         // PAYMENT_COMPLETED 상태면, 재고 차감 확정 진행
         if (saga.getStatus() ==
                 ProcessSaga.ProcessSagaStatus.PAYMENT_COMPLETED)

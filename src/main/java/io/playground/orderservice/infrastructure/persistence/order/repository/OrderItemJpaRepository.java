@@ -19,6 +19,5 @@ public interface OrderItemJpaRepository extends JpaRepository<OrderItemEntity, L
             "where oi.order.externalId = :orderExternalId and " +
                     "oi.canceledQuantity = 0"
     )
-    int updateCanceledReasonsByOrderExternalId(String orderExternalId,
-                                               String reason);
+    int updateCanceledReasonsByOrderExternalId(String orderExternalId, String reason);
 }

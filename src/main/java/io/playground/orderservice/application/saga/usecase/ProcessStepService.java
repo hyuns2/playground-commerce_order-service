@@ -15,7 +15,6 @@ import io.playground.orderservice.exception.BusinessErrorDto;
 import io.playground.orderservice.infrastructure.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -131,7 +130,6 @@ public class ProcessStepService {
         );
     }
 
-    @Transactional
     public void doOrder(ProcessSaga saga,
                         Long userId,
                         String orderExternalId,
@@ -193,7 +191,6 @@ public class ProcessStepService {
         );
     }
 
-    @Transactional
     public void completeOrder(ProcessSaga saga,
                               String orderExternalId) {
         execute(
@@ -213,7 +210,6 @@ public class ProcessStepService {
         );
     }
 
-    @Transactional
     public void compensate(String idempotencyKey,
                            ProcessSaga saga) {
         if (

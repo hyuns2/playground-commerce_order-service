@@ -13,5 +13,7 @@ public interface OrderItemPersistencePort {
 
     boolean updateCanceledReasonsByOrderExternalId(String orderExternalId, String reason);
 
-    boolean updateCanceledQuantityAndReasonsByVariantIds(Map<Long, Integer> cancelsItemQuantities, String reason);
+    boolean updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(String orderExternalId,
+                                                                           Map<Long, Integer> cancelsItemQuantities,
+                                                                           String reason);
 }

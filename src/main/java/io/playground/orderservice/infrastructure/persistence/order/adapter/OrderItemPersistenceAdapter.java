@@ -60,12 +60,15 @@ public class OrderItemPersistenceAdapter implements OrderItemPersistencePort {
     }
 
     @Override
-    public boolean updateCanceledQuantityAndReasonsByVariantIds(Map<Long, Integer> cancelsItemQuantities,
-                                                                String reason) {
+    public boolean updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(String orderExternalId,
+                                                                                  Map<Long, Integer> cancelsItemQuantities,
+                                                                                  String reason) {
         return Arrays.stream(
                 orderItemTemplate
-                        .updateCanceledQuantityAndReasonsByVariantIds(
-                                cancelsItemQuantities, reason
+                        .updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(
+                                orderExternalId,
+                                cancelsItemQuantities,
+                                reason
                         )
         ).allMatch(v -> v > 0);
     }

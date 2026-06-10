@@ -122,7 +122,8 @@ public class CancellationService {
                                 String reason) {
         // 취소 수량 += 요청 수량, 취소 사유 업데이트
         // orderItem 존재하는지, 취소 가능한 수량인지 확인
-        if (!orderItemPersistence.updateCanceledQuantityAndReasonsByVariantIds(
+        if (!orderItemPersistence.updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(
+                orderExternalId,
                 variantQuantities,
                 reason
         ))
