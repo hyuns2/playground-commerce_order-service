@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -26,6 +28,29 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
         return orderSagaRepository.saveAndFlush(
                 ProcessSagaEntity.fromDomain(processSaga)
         ).toDomain();
+    }
+
+    @Override
+    public List<ProcessSaga> findExpiredSagas(int limitSize,
+                                              int retryMax) {
+        return orderSagaRepository
+                .findExpiredSagas(limitSize, retryMax).stream()
+                .map(ProcessSagaEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public boolean updateStatus(Long id,
+                                ProcessSaga.ProcessSagaStatus status) {
+        return jdbcTemplate.update(
+                "UPDATE process_sagas " +
+                        "SET status = :status " +
+                    "WHERE id = :id",
+                Map.of(
+                        "id", id,
+                        "status", status.name()
+                )
+        ) == 1;
     }
 
     @Override
@@ -51,10 +76,24 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
         return jdbcTemplate.update(
                 "UPDATE process_sagas " +
                         "SET payment_key = :paymentKey " +
-                        "WHERE order_external_id = :orderExternalId",
+                    "WHERE order_external_id = :orderExternalId",
                 Map.of(
                         "orderExternalId", orderExternalId,
                         "paymentKey", paymentKey
+                )
+        ) == 1;
+    }
+
+    @Override
+    public boolean updateRetryCountAndLockedUntil(Long id, Instant lockedUntil) {
+        return jdbcTemplate.update(
+                "UPDATE process_sagas " +
+                        "SET retry_count = retry_count + 1, " +
+                        "AND locked_until = :lockedUntil " +
+                    "WHERE id = :id",
+                Map.of(
+                        "id", id,
+                        "locked_until", lockedUntil
                 )
         ) == 1;
     }

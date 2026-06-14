@@ -29,9 +29,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-    // batch
-    implementation 'org.springframework.boot:spring-boot-starter-batch'
-
     // client
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
 

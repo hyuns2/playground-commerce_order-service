@@ -15,10 +15,14 @@ import io.playground.orderservice.exception.BusinessErrorDto;
 import io.playground.orderservice.infrastructure.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 @Service
@@ -49,10 +53,10 @@ public class ProcessStepService {
         } catch (BusinessDetailException e) {
             if (sagaPersistence.updateStatus(
                     saga.getOrderExternalId(),
-                    ProcessSaga.ProcessSagaStatus.FAILED,
+                    ProcessSaga.ProcessSagaStatus.COMPENSATED,
                     beforeStatus
             ))
-                saga.updateStatus(ProcessSaga.ProcessSagaStatus.FAILED);
+                saga.updateStatus(ProcessSaga.ProcessSagaStatus.COMPENSATED);
 
             throw new BusinessDetailException(
                     errorCode,
@@ -80,10 +84,10 @@ public class ProcessStepService {
         } catch (BusinessDetailException e) {
             if (sagaPersistence.updateStatus(
                     saga.getOrderExternalId(),
-                    ProcessSaga.ProcessSagaStatus.FAILED,
+                    ProcessSaga.ProcessSagaStatus.COMPENSATED,
                     beforeStatus
             ))
-                saga.updateStatus(ProcessSaga.ProcessSagaStatus.FAILED);
+                saga.updateStatus(ProcessSaga.ProcessSagaStatus.COMPENSATED);
 
             throw new BusinessDetailException(
                     errorCode,
@@ -210,13 +214,58 @@ public class ProcessStepService {
         );
     }
 
+    @Transactional
+    public List<ProcessSaga> findExpiredSagas(int limitSize,
+                                              int retryMax) {
+        List<ProcessSaga> expiredSagas = sagaPersistence
+                .findExpiredSagas(limitSize, retryMax);
+
+        for (ProcessSaga saga : expiredSagas)
+            saga.updateLockedUntil(
+                    Instant.now()
+                            .plus(Duration.ofMinutes(1))
+            );
+
+        return expiredSagas;
+    }
+
+    @Transactional
+    public void markCompensated(ProcessSaga saga) {
+        sagaPersistence.updateStatus(
+                saga.getId(),
+                ProcessSaga.ProcessSagaStatus.COMPENSATED
+        );
+    }
+
+    @Transactional
+    public void markRetryOrFail(ProcessSaga saga,
+                                int retryCount) {
+        if (saga.getRetryCount() < retryCount) {
+            sagaPersistence.updateRetryCountAndLockedUntil(
+                    saga.getId(),
+                    null
+            );
+
+            return;
+        }
+
+        eventProducer.produce(
+                OrderEvent.EventType.COMPENSATION_FAILED,
+                OrderEvent.CompensationFailed.builder()
+                        .processSagaId(saga.getId())
+                        .orderExternalId(saga.getOrderExternalId())
+                        .build(),
+                UUID.randomUUID().toString()
+        );
+    }
+
     public void compensate(String idempotencyKey,
                            ProcessSaga saga) {
         if (
                 saga.getStatus() ==
                         ProcessSaga.ProcessSagaStatus.ORDER_COMPLETED ||
                 saga.getStatus() ==
-                        ProcessSaga.ProcessSagaStatus.FAILED
+                        ProcessSaga.ProcessSagaStatus.COMPENSATED
         )
             return;
 
@@ -250,22 +299,6 @@ public class ProcessStepService {
                                 .build(),
                         idempotencyKey
                 );
-
-                // 사가 상태 업데이트
-                if (
-                        sagaPersistence.updateStatus(
-                                saga.getOrderExternalId(),
-                                ProcessSaga.ProcessSagaStatus.FAILED,
-                                saga.getStatus()
-                        )
-                )
-                    saga.updateStatus(
-                            ProcessSaga.ProcessSagaStatus.FAILED);
-                else
-                    throw new BusinessDetailException(
-                            BusinessErrorCode.ORDER_EXPIRED_FAILED,
-                            "INVALID_ORDER_STATUS"
-                    );
         }
     }
 }

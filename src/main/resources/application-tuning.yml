@@ -1,0 +1,13 @@
+tuning:
+  scheduler:
+    pool-size: 2
+  compensation-worker:
+    scheduling-interval: 10000
+    pool-size: 4
+    limit-size: 20
+    retry-max: 3
+  outbox-worker:
+    scheduling-interval: 15000
+    pool-size: 4
+    limit-size: 100
+    retry-max: 3

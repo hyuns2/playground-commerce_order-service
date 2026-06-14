@@ -8,8 +8,10 @@ import java.util.Map;
 public class OrderEvent {
     public enum EventType {
         ORDER_EXPIRED,
-        CANCEL_ALL,
-        CANCEL_PARTIALLY
+        ALL_CANCELED,
+        PARTIALLY_CANCELED,
+        COMPENSATION_FAILED,
+        OUTBOXING_FAILED
     }
 
     @Builder
@@ -19,17 +21,32 @@ public class OrderEvent {
     }
 
     @Builder
-    public record CancelAll(
+    public record AllCanceled(
             String orderExternalId
     ) {
     }
 
     @Builder
-    public record CancelPartially(
+    public record PartiallyCanceled(
             String idempotencyKey,
             String orderExternalId,
             Map<Long, Integer> canceledVariantQuantities,
             BigDecimal canceledAmount
+    ) {
+    }
+
+    @Builder
+    public record CompensationFailed(
+            Long processSagaId,
+            String orderExternalId
+    ) {
+    }
+
+    @Builder
+    public record OutboxingFailed(
+            Long outboxId,
+            String eventId,
+            OrderEvent.EventType eventType
     ) {
     }
 }

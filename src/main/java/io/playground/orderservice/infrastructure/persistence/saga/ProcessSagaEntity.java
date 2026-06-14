@@ -18,6 +18,9 @@ import java.time.Instant;
                         columnNames = {"orderExternalId", "paymentKey"}
                 )
         }
+//        indexes = {
+//                @Index(name = "idx_status", columnList = "status"),
+//        }
 )
 public class ProcessSagaEntity {
     @Id
@@ -37,11 +40,19 @@ public class ProcessSagaEntity {
     @Column(nullable = false)
     private Instant expiresAt;
 
+    @Column(nullable = false)
+    private int retryCount;
+
+    @Column
+    private Instant lockedUntil;
+
     public static ProcessSagaEntity fromDomain(ProcessSaga processSaga) {
         return ProcessSagaEntity.builder()
                 .orderExternalId(processSaga.getOrderExternalId())
                 .status(processSaga.getStatus())
                 .expiresAt(processSaga.getExpiresAt())
+                .retryCount(processSaga.getRetryCount())
+                .lockedUntil(processSaga.getLockedUntil())
                 .build();
     }
 
@@ -51,7 +62,9 @@ public class ProcessSagaEntity {
                 this.orderExternalId,
                 this.paymentKey,
                 this.status,
-                this.expiresAt
+                this.expiresAt,
+                this.retryCount,
+                this.lockedUntil
         );
     }
 }

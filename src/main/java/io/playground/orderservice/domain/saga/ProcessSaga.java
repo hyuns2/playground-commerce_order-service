@@ -18,6 +18,12 @@ public class ProcessSaga {
 
     private Instant expiresAt;
 
+    // 재시도용 필드
+    private int retryCount;
+
+    // 재시도용 필드
+    private Instant lockedUntil;
+
     public enum ProcessSagaStatus {
         STARTED,
         STOCKS_RESERVED,
@@ -25,18 +31,24 @@ public class ProcessSaga {
         PAYMENT_COMPLETED,
         STOCKS_CONFIRMED,
         ORDER_COMPLETED,
-        FAILED
+        COMPENSATED
     }
 
     public static ProcessSaga of(Long id,
                                  String orderExternalId,
                                  String paymentKey,
                                  ProcessSagaStatus status,
-                                 Instant expiresAt) {
-        return new ProcessSaga(id, orderExternalId, paymentKey, status, expiresAt);
+                                 Instant expiresAt,
+                                 int retryCount,
+                                 Instant lockedUntil) {
+        return new ProcessSaga(id, orderExternalId, paymentKey, status, expiresAt, retryCount, lockedUntil);
     }
 
     public void updateStatus(ProcessSagaStatus status) {
         this.status = status;
+    }
+
+    public void updateLockedUntil(Instant lockedUntil) {
+        this.lockedUntil = lockedUntil;
     }
 }

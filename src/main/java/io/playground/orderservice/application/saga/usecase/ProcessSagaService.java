@@ -54,14 +54,16 @@ public class ProcessSagaService {
                                      orderExternalId,
                                      null,
                                      ProcessSaga.ProcessSagaStatus.STARTED,
-                                     Instant.now().plusSeconds(2 * 60L)
+                                     Instant.now().plusSeconds(5 * 60L),
+                                     0,
+                                     null
                              )
                      )
              );
 
         // 실패건이면 재시도 불가로 예외 발생
         if (saga.getStatus() ==
-                ProcessSaga.ProcessSagaStatus.FAILED)
+                ProcessSaga.ProcessSagaStatus.COMPENSATED)
             throw new BusinessDetailException(
                     BusinessErrorCode.ORDER_PROCESS_FAILED,
                     "ORDER_STATUS: FAILED"
@@ -156,7 +158,7 @@ public class ProcessSagaService {
 
         // 실패건이면 재시도 불가로 예외 발생
         if (saga.getStatus() ==
-                ProcessSaga.ProcessSagaStatus.FAILED)
+                ProcessSaga.ProcessSagaStatus.COMPENSATED)
             throw new BusinessDetailException(
                     BusinessErrorCode.ORDER_PAYMENT_FAILED,
                     "ORDER_STATUS: FAILED"
@@ -215,33 +217,6 @@ public class ProcessSagaService {
                 ProcessSaga.ProcessSagaStatus.ORDER_COMPLETED)
             throw new BusinessException(
                     BusinessErrorCode.ORDER_PAYMENT_FAILED
-            );
-    }
-
-    /**
-     * 주문 전체 프로세스의 상태 기반 보상 프로세스
-     * - 배치에서 실행
-     *
-     * @param idempotencyKey 멱등성 보장키
-     * @param saga 주문 프로세스의 사가 객체
-     */
-    @Retryable(
-            noRetryFor = BusinessDetailException.class,
-            backoff = @Backoff(
-                    delay = 1000, multiplier = 2
-            )
-    )
-    public void compensate(String idempotencyKey,
-                           ProcessSaga saga) {
-        if (
-                saga.getStatus() !=
-                        ProcessSaga.ProcessSagaStatus.ORDER_COMPLETED &&
-                saga.getStatus() !=
-                        ProcessSaga.ProcessSagaStatus.FAILED
-        )
-            processStepService.compensate(
-                    idempotencyKey,
-                    saga
             );
     }
 }

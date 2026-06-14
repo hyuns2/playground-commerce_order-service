@@ -43,6 +43,12 @@ public class OutboxEntity {
     @Column(nullable = false)
     private boolean processed;
 
+    @Column(nullable = false)
+    private int retryCount;
+
+    @Column
+    private Instant lockedUntil;
+
     public static OutboxEntity of(OrderEvent.EventType eventType,
                                   String traceId,
                                   String payload) {
@@ -53,6 +59,12 @@ public class OutboxEntity {
                 .traceId(traceId)
                 .payload(payload)
                 .processed(false)
+                .retryCount(0)
+                .lockedUntil(null)
                 .build();
+    }
+
+    public void updateLockedUntil(Instant lockedUntil) {
+        this.lockedUntil = lockedUntil;
     }
 }

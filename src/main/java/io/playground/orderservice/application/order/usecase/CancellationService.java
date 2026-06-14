@@ -74,8 +74,8 @@ public class CancellationService {
 
         // 재고 복구를 위한 이벤트 발행
         eventProducer.produce(
-                OrderEvent.EventType.CANCEL_ALL,
-                OrderEvent.CancelAll.builder()
+                OrderEvent.EventType.ALL_CANCELED,
+                OrderEvent.AllCanceled.builder()
                         .orderExternalId(orderExternalId)
                         .build(),
                 idempotencyKey
@@ -163,8 +163,8 @@ public class CancellationService {
 
         // 재고 복구를 위한 이벤트 발행
         eventProducer.produce(
-                OrderEvent.EventType.CANCEL_PARTIALLY,
-                OrderEvent.CancelPartially.builder()
+                OrderEvent.EventType.PARTIALLY_CANCELED,
+                OrderEvent.PartiallyCanceled.builder()
                         .idempotencyKey(idempotencyKey)
                         .orderExternalId(orderExternalId)
                         .canceledVariantQuantities(variantQuantities)
