@@ -32,6 +32,7 @@ public class CompensationWorker {
                             UUID.randomUUID().toString(),
                             saga
                     );
+
                     processStepService.markCompensated(saga);
                 } catch (Exception e) {
                     processStepService.markRetryOrFail(

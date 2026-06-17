@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +55,7 @@ public class ProcessSagaService {
                                      orderExternalId,
                                      null,
                                      ProcessSaga.ProcessSagaStatus.STARTED,
-                                     Instant.now().plusSeconds(5 * 60L),
+                                     Instant.now().plus(Duration.ofMinutes(5)),
                                      0,
                                      null
                              )
@@ -179,6 +180,13 @@ public class ProcessSagaService {
             );
 
         // ORDER_CREATED 상태면, 결제 승인 진행
+        if (!sagaPersistence.updatePaymentKey(
+                orderExternalId, paymentKey))
+            throw new BusinessDetailException(
+                    BusinessErrorCode.ORDER_PAYMENT_FAILED,
+                    "PAYMENT_UPDATE_FAILED"
+            );
+
         if (saga.getStatus() ==
                 ProcessSaga.ProcessSagaStatus.ORDER_CREATED)
             processStepService.approvePayment(
@@ -187,13 +195,6 @@ public class ProcessSagaService {
                     orderExternalId,
                     paymentKey,
                     amount
-            );
-
-        if (!sagaPersistence.updatePaymentKey(
-                orderExternalId, paymentKey))
-            throw new BusinessDetailException(
-                BusinessErrorCode.ORDER_PAYMENT_FAILED,
-                "PAYMENT_UPDATE_FAILED"
             );
 
         // PAYMENT_COMPLETED 상태면, 재고 차감 확정 진행

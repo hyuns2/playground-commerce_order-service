@@ -282,10 +282,11 @@ public class ProcessStepService {
                                         .build()
                         );
                     } catch (BusinessDetailException e) {
-                        throw new BusinessDetailException(
+                        if (!e.getDetail().equals("PAYMENT_NOT_FOUND"))
+                            throw new BusinessDetailException(
                                 BusinessErrorCode.PAYMENT_SERVICE_FAILED,
                                 jsonUtil.toJson(BusinessErrorDto.from(e))
-                        );
+                            );
                     }
             case STOCKS_RESERVED:
                 // 주문 존재할 경우, 취소
