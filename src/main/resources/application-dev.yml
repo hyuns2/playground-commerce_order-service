@@ -10,7 +10,7 @@ spring:
     password: ${MYSQL_PASSWORD}
 
     hikari:
-      maximum-pool-size: ${POOL_MAX_SIZE}
+      maximum-pool-size: ${ORDER_SERVICE_POOL_MAX_SIZE}
 
   jpa:
     hibernate:

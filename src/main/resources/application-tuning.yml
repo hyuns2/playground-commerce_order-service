@@ -2,12 +2,12 @@ tuning:
   scheduler:
     pool-size: 2
   compensation-worker:
-    scheduling-interval: 10000
-    pool-size: 4
-    limit-size: 20
+    scheduling-interval: ${COMPENSATION_WORKER_SCHEDULING_INTERVAL}
+    pool-size: ${COMPENSATION_WORKER_POOL_SIZE}
+    limit-size: ${COMPENSATION_WORKER_LIMIT_SIZE}
     retry-max: 3
   outbox-worker:
-    scheduling-interval: 15000
-    pool-size: 4
-    limit-size: 100
+    scheduling-interval: ${OUTBOX_WORKER_SCHEDULING_INTERVAL}
+    pool-size: ${OUTBOX_WORKER_POOL_SIZE}
+    limit-size: ${OUTBOX_WORKER_LIMIT_SIZE}
     retry-max: 3
