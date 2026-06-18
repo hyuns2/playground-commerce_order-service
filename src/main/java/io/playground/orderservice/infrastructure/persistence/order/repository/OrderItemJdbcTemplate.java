@@ -13,16 +13,16 @@ import java.util.Map;
 public class OrderItemJdbcTemplate {
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
-    public int[] updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(String orderExternalId,
-                                                                                Map<Long, Integer> cancelsItemQuantities,
-                                                                                String reason) {
+    public int[] updateCanceledInfosToCancelPartially(String orderExternalId,
+                                                      Map<Long, Integer> cancelsItemQuantities,
+                                                      String reason) {
         return jdbcTemplate.batchUpdate(
                 "UPDATE order_items oi " +
                         "JOIN orders o ON oi.order_id = o.id " +
                         "SET oi.canceled_quantity = oi.canceled_quantity + :canceledQuantity, " +
                             "oi.canceled_reason = :reason " +
-                    "WHERE o.external_id = :orderExternalId and " +
-                        "oi.variant_id = :variantId and " +
+                    "WHERE oi.variant_id = :variantId and " +
+                        "o.external_id = :orderExternalId and " +
                         "oi.canceled_quantity + :canceledQuantity <= oi.quantity",
                 cancelsItemQuantities.entrySet().stream()
                         .map(e -> new MapSqlParameterSource()

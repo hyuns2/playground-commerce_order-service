@@ -1,6 +1,7 @@
 package io.playground.orderservice.infrastructure.persistence.order.adapter;
 
 import io.playground.orderservice.application.order.port.OrderItemPersistencePort;
+import io.playground.orderservice.domain.order.Order;
 import io.playground.orderservice.domain.order.OrderItem;
 import io.playground.orderservice.infrastructure.persistence.order.entity.OrderEntity;
 import io.playground.orderservice.infrastructure.persistence.order.entity.OrderItemEntity;
@@ -22,12 +23,26 @@ public class OrderItemPersistenceAdapter implements OrderItemPersistencePort {
     private final OrderJpaRepository orderRepository;
 
     @Override
-    public List<OrderItem> findAllByVariantIdsAndOrderExternalId(List<Long> variantIds,
-                                                                 String orderExternalId) {
+    public List<OrderItem> findAllByOrderExternalIdAndOrderStatus(String orderExternalId,
+                                                                  Order.OrderStatus orderStatus) {
         return orderItemRepository
-                .findAllByVariantIdInAndOrder_ExternalId(
+                .findAllByOrder_ExternalIdAndOrder_Status(
+                        orderExternalId,
+                        Order.OrderStatus.PAID
+                ).stream()
+                .map(OrderItemEntity::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<OrderItem> findAllByVariantIdsAndOrderExternalIdAndOrderStatusIn(String orderExternalId,
+                                                                                 List<Long> variantIds,
+                                                                                 List<Order.OrderStatus> orderStatuses) {
+        return orderItemRepository
+                .findAllByVariantIdInAndOrder_ExternalIdAndOrder_StatusIn(
                         variantIds,
-                        orderExternalId
+                        orderExternalId,
+                        orderStatuses
                 ).stream()
                 .map(OrderItemEntity::toDomain)
                 .toList();
@@ -51,21 +66,21 @@ public class OrderItemPersistenceAdapter implements OrderItemPersistencePort {
     }
 
     @Override
-    public boolean updateCanceledReasonsByOrderExternalId(String orderExternalId,
-                                                          String reason) {
+    public boolean updateCanceledReasonsToCancelAll(String orderExternalId,
+                                                    String reason) {
         return orderItemRepository
-                .updateCanceledReasonsByOrderExternalId(
+                .updateCanceledReasonsToCancelAll(
                         orderExternalId, reason
                 ) > 0;
     }
 
     @Override
-    public boolean updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(String orderExternalId,
-                                                                                  Map<Long, Integer> cancelsItemQuantities,
-                                                                                  String reason) {
+    public boolean updateCanceledInfosToCancelPartially(String orderExternalId,
+                                                        Map<Long, Integer> cancelsItemQuantities,
+                                                        String reason) {
         return Arrays.stream(
                 orderItemTemplate
-                        .updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(
+                        .updateCanceledInfosToCancelPartially(
                                 orderExternalId,
                                 cancelsItemQuantities,
                                 reason

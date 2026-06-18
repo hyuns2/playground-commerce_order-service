@@ -1,12 +1,7 @@
 package io.playground.orderservice.application.order.usecase;
 
-import io.playground.orderservice.application.eventstream.EventProducerPort;
-import io.playground.orderservice.application.eventstream.OrderEvent;
-import io.playground.orderservice.application.order.port.OrderItemPersistencePort;
-import io.playground.orderservice.application.order.port.OrderPersistencePort;
 import io.playground.orderservice.application.saga.dto.ClientDto;
 import io.playground.orderservice.application.saga.port.client.PaymentClientPort;
-import io.playground.orderservice.domain.order.Order;
 import io.playground.orderservice.exception.BusinessDetailException;
 import io.playground.orderservice.exception.BusinessErrorCode;
 import io.playground.orderservice.exception.BusinessErrorDto;
@@ -15,19 +10,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
 
+// ToDo: 결제 정상 취소된건지, 주문과 결제의 취소내역 비교 필요
 @Service
 @RequiredArgsConstructor
 public class CancellationService {
-    private final OrderPersistencePort orderPersistence;
-    private final OrderItemPersistencePort orderItemPersistence;
     private final PaymentClientPort paymentClient;
-    private final EventProducerPort eventProducer;
+    private final CancellationTxService cancellationTxService;
     private final JsonUtil jsonUtil;
 
     /**
@@ -45,41 +37,12 @@ public class CancellationService {
                     delay = 1000, multiplier = 2
             )
     )
-    @Transactional
     public void cancelAll(String idempotencyKey,
                           String orderExternalId,
                           String paymentKey,
                           String reason) {
-        // 취소 수량 = 주문 수량 확인, 취소 사유 업데이트
-        // + orderExternalId & orderItems 존재하는지 확인
-        if (!orderItemPersistence.updateCanceledReasonsByOrderExternalId(
-                orderExternalId,
-                reason
-        ))
-            throw new BusinessDetailException(
-                    BusinessErrorCode.ORDER_CANCELLATION_FAILED,
-                    "ORDER_NOT_FOUND OR NOT_INITIAL_CANCELLATION"
-            );
-
-        // 주문 상태 업데이트
-        if (!orderPersistence.updateStatusByExternalId(
-                orderExternalId,
-                Order.OrderStatus.CANCELED,
-                List.of(Order.OrderStatus.PAID)
-        ))
-            throw new BusinessDetailException(
-                    BusinessErrorCode.ORDER_CANCELLATION_FAILED,
-                    "ORDER_STATUS_MUST_BE_PAID"
-            );
-
-        // 재고 복구를 위한 이벤트 발행
-        eventProducer.produce(
-                OrderEvent.EventType.ALL_CANCELED,
-                OrderEvent.AllCanceled.builder()
-                        .orderExternalId(orderExternalId)
-                        .build(),
-                idempotencyKey
-        );
+        // 전체취소 가능한지 확인
+        cancellationTxService.validateToCancelAll(orderExternalId);
 
         // 전체취소 요청
         try {
@@ -96,6 +59,13 @@ public class CancellationService {
                     jsonUtil.toJson(BusinessErrorDto.from(e))
             );
         }
+
+        // 전체취소로 주문 상태 업데이트
+        cancellationTxService.cancelAll(
+                idempotencyKey,
+                orderExternalId,
+                reason
+        );
     }
 
     /**
@@ -114,64 +84,17 @@ public class CancellationService {
                     delay = 1000, multiplier = 2
             )
     )
-    @Transactional
     public void cancelPartially(String idempotencyKey,
                                 String orderExternalId,
                                 String paymentKey,
                                 Map<Long, Integer> variantQuantities,
                                 String reason) {
-        // 취소 수량 += 요청 수량, 취소 사유 업데이트
-        // orderItem 존재하는지, 취소 가능한 수량인지 확인
-        if (!orderItemPersistence.updateCanceledQuantityAndReasonsByOrderExternalIdAndVariantIds(
-                orderExternalId,
-                variantQuantities,
-                reason
-        ))
-            throw new BusinessDetailException(
-                    BusinessErrorCode.ORDER_PARTIAL_CANCELLATION_FAILED,
-                    "ORDER_NOT_FOUND OR INVALID_PARTIAL_CANCELLATION_REQUEST"
-            );
-
-        // 주문 상태 업데이트
-        if (!orderPersistence.updateStatusByExternalId(
-                orderExternalId,
-                Order.OrderStatus.PARTIAL_CANCELED,
-                List.of(
-                        Order.OrderStatus.PAID,
-                        Order.OrderStatus.PARTIAL_CANCELED
-                )
-        ))
-            throw new BusinessDetailException(
-                    BusinessErrorCode.ORDER_PARTIAL_CANCELLATION_FAILED,
-                    "ORDER_STATUS_MUST_BE_PAID_OR_PARTIAL_CANCELED"
-            );
-
-        // 취소 금액 계산
-        BigDecimal cancelsAmount = orderItemPersistence
-                .findAllByVariantIdsAndOrderExternalId(
-                        variantQuantities.keySet().stream().toList(),
-                        orderExternalId
-                ).stream()
-                .map(oi -> oi.getPrice()
-                        .multiply(
-                                BigDecimal.valueOf(
-                                        variantQuantities.get(oi.getVariantId())
-                                )
-                        )
-                ).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-
-        // 재고 복구를 위한 이벤트 발행
-        eventProducer.produce(
-                OrderEvent.EventType.PARTIALLY_CANCELED,
-                OrderEvent.PartiallyCanceled.builder()
-                        .idempotencyKey(idempotencyKey)
-                        .orderExternalId(orderExternalId)
-                        .canceledVariantQuantities(variantQuantities)
-                        .canceledAmount(cancelsAmount)
-                        .build(),
-                idempotencyKey
-        );
+        // 부분취소 가능한지 확인 -> 취소금액 계산
+        BigDecimal cancelsAmount = cancellationTxService
+                .validateAndCalculateAmountToCancelPartially(
+                        orderExternalId,
+                        variantQuantities
+                );
 
         // 부분취소 요청
         try {
@@ -189,5 +112,14 @@ public class CancellationService {
                     jsonUtil.toJson(BusinessErrorDto.from(e))
             );
         }
+
+        // 부분취소로 주문 상태 업데이트
+        cancellationTxService.cancelPartially(
+                idempotencyKey,
+                orderExternalId,
+                variantQuantities,
+                reason,
+                cancelsAmount
+        );
     }
 }

@@ -1,5 +1,6 @@
 package io.playground.orderservice.infrastructure.persistence.order.repository;
 
+import io.playground.orderservice.domain.order.Order;
 import io.playground.orderservice.infrastructure.persistence.order.entity.OrderItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,8 +9,12 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface OrderItemJpaRepository extends JpaRepository<OrderItemEntity, Long> {
-    List<OrderItemEntity> findAllByVariantIdInAndOrder_ExternalId(List<Long> variantIds,
-                                                                  String orderExternalId);
+    List<OrderItemEntity> findAllByOrder_ExternalIdAndOrder_Status(String orderExternalId,
+                                                                   Order.OrderStatus status);
+
+    List<OrderItemEntity> findAllByVariantIdInAndOrder_ExternalIdAndOrder_StatusIn(List<Long> variantIds,
+                                                                                   String orderExternalId,
+                                                                                   List<Order.OrderStatus> statuses);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query(
@@ -19,5 +24,5 @@ public interface OrderItemJpaRepository extends JpaRepository<OrderItemEntity, L
             "where oi.order.externalId = :orderExternalId and " +
                     "oi.canceledQuantity = 0"
     )
-    int updateCanceledReasonsByOrderExternalId(String orderExternalId, String reason);
+    int updateCanceledReasonsToCancelAll(String orderExternalId, String reason);
 }
