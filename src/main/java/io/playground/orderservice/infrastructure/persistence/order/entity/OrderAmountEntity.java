@@ -13,7 +13,12 @@ import java.math.BigDecimal;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "order_amounts")
+@Table(
+        name = "order_amounts",
+        indexes = {
+                @Index(name = "idx_finalAmount", columnList = "finalAmount")
+        }
+)
 public class OrderAmountEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
         name = "order_items",
         uniqueConstraints = {
                 @UniqueConstraint(
+                        name = "uk_variantId_orderId",
                         columnNames = {"variantId", "orderId"}
                 )
         }

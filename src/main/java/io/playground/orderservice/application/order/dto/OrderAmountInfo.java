@@ -5,8 +5,8 @@ import io.playground.orderservice.domain.order.Order;
 import java.math.BigDecimal;
 
 public record OrderAmountInfo(
-        Long orderId,
         Order.OrderStatus status,
+        Long orderId,
         BigDecimal finalAmount
 ) {
 }

@@ -13,10 +13,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 @Table(
-        name = "outboxes"
-//        indexes = {
-//                @Index(name = "idx_processed", columnList = "processed")
-//        }
+        name = "outboxes",
+        indexes = {
+                @Index(
+                        name = "idx_retryCount_lockedUntil_occurredAt",
+                        columnList = "retryCount, lockedUntil, occurredAt"
+                )
+        }
 )
 public class OutboxEntity {
     @Id

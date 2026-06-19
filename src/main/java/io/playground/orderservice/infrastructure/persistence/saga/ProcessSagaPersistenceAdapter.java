@@ -14,18 +14,18 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort {
-    private final ProcessSagaJpaRepository orderSagaRepository;
+    private final ProcessSagaJpaRepository processSagaRepository;
     private final NamedParameterJdbcTemplate jdbcTemplate;
 
     @Override
     public Optional<ProcessSaga> findByOrderExternalId(String orderExternalId) {
-        return orderSagaRepository.findByOrderExternalId(orderExternalId)
+        return processSagaRepository.findByOrderExternalId(orderExternalId)
                 .map(ProcessSagaEntity::toDomain);
     }
 
     @Override
     public ProcessSaga saveAndFlush(ProcessSaga processSaga) {
-        return orderSagaRepository.saveAndFlush(
+        return processSagaRepository.saveAndFlush(
                 ProcessSagaEntity.fromDomain(processSaga)
         ).toDomain();
     }
@@ -33,7 +33,7 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
     @Override
     public List<ProcessSaga> findExpiredSagas(int limitSize,
                                               int retryMax) {
-        return orderSagaRepository
+        return processSagaRepository
                 .findExpiredSagas(limitSize, retryMax).stream()
                 .map(ProcessSagaEntity::toDomain)
                 .toList();

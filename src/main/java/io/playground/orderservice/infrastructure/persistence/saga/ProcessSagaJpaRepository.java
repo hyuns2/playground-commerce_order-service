@@ -12,8 +12,8 @@ public interface ProcessSagaJpaRepository extends JpaRepository<ProcessSagaEntit
     @Query(value = """
             SELECT * FROM process_sagas
             WHERE expires_at < NOW()
+                AND retry_count < :retryMax
                 AND status not in ('ORDER_COMPLETED', 'COMPENSATED')
-                AND retry_count <= :retryMax
                 AND (locked_until IS NULL OR locked_until < NOW())
             LIMIT :limitSize
             FOR UPDATE SKIP LOCKED;

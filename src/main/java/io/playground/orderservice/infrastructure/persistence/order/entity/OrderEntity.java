@@ -12,7 +12,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = lombok.AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "orders")
+@Table(
+        name = "orders",
+        indexes = {
+                @Index(
+                        name = "idx_externalId_status_id",
+                        columnList = "externalId, status, id"
+                )
+        }
+)
 public class OrderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

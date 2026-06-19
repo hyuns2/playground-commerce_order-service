@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface OrderAmountJpaRepository extends JpaRepository<OrderAmountEntity, Long> {
     @Query("SELECT new io.playground.orderservice.application.order.dto.OrderAmountInfo(" +
-                "o.id, o.status, oa.finalAmount " +
+                "o.status, o.id, oa.finalAmount " +
             ") FROM OrderAmountEntity oa " +
                 "JOIN oa.order o " +
             "WHERE o.externalId = :orderExternalId")

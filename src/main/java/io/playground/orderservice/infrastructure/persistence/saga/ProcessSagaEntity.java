@@ -15,12 +15,16 @@ import java.time.Instant;
         name = "process_sagas",
         uniqueConstraints = {
                 @UniqueConstraint(
+                        name = "uk_orderExternalId_paymentKey",
                         columnNames = {"orderExternalId", "paymentKey"}
                 )
+        },
+        indexes = {
+                @Index(
+                        name = "idx_expiresAt_retryCount",
+                        columnList = "expiresAt, retryCount"
+                )
         }
-//        indexes = {
-//                @Index(name = "idx_status", columnList = "status"),
-//        }
 )
 public class ProcessSagaEntity {
     @Id
