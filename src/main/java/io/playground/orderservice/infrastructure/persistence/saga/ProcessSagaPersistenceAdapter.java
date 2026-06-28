@@ -42,32 +42,56 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
     @Override
     public boolean updateStatus(Long id,
                                 ProcessSaga.ProcessSagaStatus status) {
-        return jdbcTemplate.update(
-                "UPDATE process_sagas " +
-                        "SET status = :status " +
-                    "WHERE id = :id",
-                Map.of(
-                        "id", id,
-                        "status", status.name()
-                )
-        ) == 1;
+        return ProcessSaga.isActiveStatus(status) ?
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET status = :status " +
+                                "WHERE id = :id",
+                        Map.of(
+                                "id", id,
+                                "status", status.name()
+                        )
+                )== 1 :
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET status = :status, " +
+                                    "is_active = false " +
+                                "WHERE id = :id",
+                        Map.of(
+                                "id", id,
+                                "status", status.name()
+                        )
+                )== 1;
     }
 
     @Override
     public boolean updateStatus(String orderExternalId,
                                 ProcessSaga.ProcessSagaStatus status,
                                 ProcessSaga.ProcessSagaStatus beforeStatus) {
-        return jdbcTemplate.update(
-                "UPDATE process_sagas " +
-                        "SET status = :status " +
-                    "WHERE order_external_id = :orderExternalId " +
-                        "AND status = :beforeStatus",
-                Map.of(
-                        "orderExternalId", orderExternalId,
-                        "status", status.name(),
-                        "beforeStatus", beforeStatus.name()
-                )
-        ) == 1;
+        return ProcessSaga.isActiveStatus(status) ?
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET status = :status " +
+                            "WHERE order_external_id = :orderExternalId " +
+                                "AND status = :beforeStatus",
+                        Map.of(
+                                "orderExternalId", orderExternalId,
+                                "status", status.name(),
+                                "beforeStatus", beforeStatus.name()
+                        )
+                ) == 1 :
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET status = :status, " +
+                                    "is_active = false " +
+                            "WHERE order_external_id = :orderExternalId " +
+                                "AND status = :beforeStatus",
+                        Map.of(
+                                "orderExternalId", orderExternalId,
+                                "status", status.name(),
+                                "beforeStatus", beforeStatus.name()
+                        )
+                ) == 1;
     }
 
     @Override

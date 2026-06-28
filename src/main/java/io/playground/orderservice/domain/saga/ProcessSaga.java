@@ -16,6 +16,8 @@ public class ProcessSaga {
 
     private ProcessSagaStatus status;
 
+    private boolean active;
+
     private Instant expiresAt;
 
     // 재시도용 필드
@@ -34,6 +36,11 @@ public class ProcessSaga {
         COMPENSATED
     }
 
+    public static boolean isActiveStatus(ProcessSagaStatus status) {
+        return status != ProcessSagaStatus.ORDER_COMPLETED &&
+                status != ProcessSagaStatus.COMPENSATED;
+    }
+
     public static ProcessSaga of(Long id,
                                  String orderExternalId,
                                  String paymentKey,
@@ -41,11 +48,23 @@ public class ProcessSaga {
                                  Instant expiresAt,
                                  int retryCount,
                                  Instant lockedUntil) {
-        return new ProcessSaga(id, orderExternalId, paymentKey, status, expiresAt, retryCount, lockedUntil);
+        return new ProcessSaga(
+                id,
+                orderExternalId,
+                paymentKey,
+                status,
+                isActiveStatus(status),
+                expiresAt,
+                retryCount,
+                lockedUntil
+        );
     }
 
     public void updateStatus(ProcessSagaStatus status) {
         this.status = status;
+
+        if (!isActiveStatus(status))
+            this.active = false;
     }
 
     public void updateLockedUntil(Instant lockedUntil) {

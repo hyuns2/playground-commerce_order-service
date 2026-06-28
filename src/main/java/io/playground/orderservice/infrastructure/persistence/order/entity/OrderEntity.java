@@ -13,13 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Table(
-        name = "orders",
-        indexes = {
-                @Index(
-                        name = "idx_externalId_status_id",
-                        columnList = "externalId, status, id"
-                )
-        }
+        name = "orders"
 )
 public class OrderEntity {
     @Id

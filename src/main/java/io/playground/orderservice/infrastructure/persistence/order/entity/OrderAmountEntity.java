@@ -14,10 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @Table(
-        name = "order_amounts",
-        indexes = {
-                @Index(name = "idx_finalAmount", columnList = "finalAmount")
-        }
+        name = "order_amounts"
 )
 public class OrderAmountEntity {
     @Id

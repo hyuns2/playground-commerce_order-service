@@ -21,8 +21,8 @@ import java.time.Instant;
         },
         indexes = {
                 @Index(
-                        name = "idx_expiresAt_retryCount",
-                        columnList = "expiresAt, retryCount"
+                        name = "idx_active_expiresAt",
+                        columnList = "active, expiresAt"
                 )
         }
 )
@@ -42,6 +42,9 @@ public class ProcessSagaEntity {
     private ProcessSaga.ProcessSagaStatus status;
 
     @Column(nullable = false)
+    private boolean active;
+
+    @Column(nullable = false)
     private Instant expiresAt;
 
     @Column(nullable = false)
@@ -54,6 +57,7 @@ public class ProcessSagaEntity {
         return ProcessSagaEntity.builder()
                 .orderExternalId(processSaga.getOrderExternalId())
                 .status(processSaga.getStatus())
+                .active(processSaga.isActive())
                 .expiresAt(processSaga.getExpiresAt())
                 .retryCount(processSaga.getRetryCount())
                 .lockedUntil(processSaga.getLockedUntil())

@@ -8,9 +8,9 @@ import java.util.List;
 public interface OutboxJpaRepository extends JpaRepository<OutboxEntity, Long> {
     @Query(value = """
             SELECT * FROM outboxes
-            WHERE retry_count <= :retryMax
+            WHERE processed = false
+                AND retry_count <= :retryMax
                 AND (locked_until IS NULL OR locked_until < NOW())
-                AND processed = false
             ORDER BY occurred_at ASC
             LIMIT :limitSize
             FOR UPDATE SKIP LOCKED;
