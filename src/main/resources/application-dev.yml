@@ -57,32 +57,13 @@ spring:
         linger.ms: 10
         delivery.timeout.ms: 120000
         request.timeout.ms: 30000
-    consumer:
-      group-id: inventory-service
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      enable-auto-commit: false
-      auto-offset-reset: earliest
-      max-poll-records: 500
-      properties:
-        isolation.level: read_committed
-        spring.json.trusted.packages: "io.playground.*"
-        max.poll.interval.ms: 300000
-        session.timeout.ms: 45000
-        heartbeat.interval.ms: 3000
-    listener:
-      ack-mode: manual
-      concurrency: 1
-      type: single
-      poll-timeout: 3000
-      auto-startup: true
 
 api:
   internal:
     catalog-service:
       url: http://${CATALOG_HOST}:${CATALOG_PORT}/client
     inventory-service:
-      url: http://${INVENTORY_HOST}:${INVENTORY_PORT}/client
+      url: http://${INVENTORY_HOST}:${INVENTORY_PORT}/${INVENTORY_URI_PREFIX}
     payment-service:
       url: http://${PAYMENT_HOST}:${PAYMENT_PORT}/client
 
