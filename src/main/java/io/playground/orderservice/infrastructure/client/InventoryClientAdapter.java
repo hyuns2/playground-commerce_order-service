@@ -7,6 +7,7 @@ import io.playground.orderservice.exception.BusinessDetailException;
 import io.playground.orderservice.exception.BusinessErrorCode;
 import io.playground.orderservice.infrastructure.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.List;
 public class InventoryClientAdapter implements InventoryClientPort {
     private final InventoryFeignClient inventoryClient;
     private final JsonUtil jsonUtil;
+    @Value("${hot-inventory.target-ids}")
+    private List<Long> hotInventoryTargetIds;
 
     private void execute(Runnable action) {
         try {
@@ -35,6 +38,13 @@ public class InventoryClientAdapter implements InventoryClientPort {
     @Override
     public void reserveStocks(String orderExternalId,
                               List<ClientDto.ReservationRequest> infos) {
+        if (infos.size() == 1 &&
+                hotInventoryTargetIds.contains(infos.get(0).variantId())) {
+            execute(() -> inventoryClient
+                    .reserveHotStocks(orderExternalId, infos));
+            return;
+        }
+
         execute(() -> inventoryClient
                 .reserveStocks(orderExternalId, infos));
     }

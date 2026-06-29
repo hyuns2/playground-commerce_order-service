@@ -11,3 +11,6 @@ tuning:
     pool-size: ${OUTBOX_WORKER_POOL_SIZE}
     limit-size: ${OUTBOX_WORKER_LIMIT_SIZE}
     retry-max: 3
+
+hot-inventory:
+  target-ids: ${HOT_INVENTORY_TARGET_IDS}

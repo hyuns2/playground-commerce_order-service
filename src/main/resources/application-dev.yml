@@ -63,7 +63,7 @@ api:
     catalog-service:
       url: http://${CATALOG_HOST}:${CATALOG_PORT}/client
     inventory-service:
-      url: http://${INVENTORY_HOST}:${INVENTORY_PORT}/${INVENTORY_URI_PREFIX}
+      url: http://${INVENTORY_HOST}:${INVENTORY_PORT}/client
     payment-service:
       url: http://${PAYMENT_HOST}:${PAYMENT_PORT}/client
 

@@ -15,4 +15,7 @@ import java.util.List;
 public interface CatalogFeignClient {
     @GetMapping
     ResponseEntity<List<ClientDto.Snapshot>> getSnapshots(@RequestParam List<Long> variantIds);
+
+    @GetMapping
+    ResponseEntity<List<ClientDto.Snapshot>> getHotSnapshots(@RequestParam List<Long> variantIds);
 }

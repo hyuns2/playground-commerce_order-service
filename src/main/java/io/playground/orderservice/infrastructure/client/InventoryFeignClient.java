@@ -18,6 +18,11 @@ public interface InventoryFeignClient {
     ResponseEntity<Void> reserveStocks(@RequestParam String orderExternalId,
                                        @RequestBody List<ClientDto.ReservationRequest> infos);
 
+    @PostMapping("/hot/reserve")
+    ResponseEntity<Void> reserveHotStocks(@RequestParam String orderExternalId,
+                                          @RequestBody List<ClientDto.ReservationRequest> infos);
+
+
     @PostMapping("/confirm")
     ResponseEntity<Void> confirmStocks(@RequestParam String orderExternalId);
 }
