@@ -110,15 +110,25 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
 
     @Override
     public boolean updateRetryCountAndLockedUntil(Long id, Instant lockedUntil) {
-        return jdbcTemplate.update(
-                "UPDATE process_sagas " +
-                        "SET retry_count = retry_count + 1, " +
-                        "AND locked_until = :lockedUntil " +
-                    "WHERE id = :id",
-                Map.of(
-                        "id", id,
-                        "locked_until", lockedUntil
-                )
-        ) == 1;
+        return lockedUntil != null ?
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET retry_count = retry_count + 1, " +
+                                "locked_until = :lockedUntil " +
+                                "WHERE id = :id",
+                        Map.of(
+                                "id", id,
+                                "locked_until", lockedUntil
+                        )
+                ) == 1 :
+                jdbcTemplate.update(
+                        "UPDATE process_sagas " +
+                                "SET retry_count = retry_count + 1, " +
+                                "locked_until = null " +
+                                "WHERE id = :id",
+                        Map.of(
+                                "id", id
+                        )
+                ) == 1;
     }
 }
