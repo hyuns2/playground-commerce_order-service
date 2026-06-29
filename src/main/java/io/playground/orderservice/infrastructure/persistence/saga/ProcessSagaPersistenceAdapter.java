@@ -55,7 +55,7 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
                 jdbcTemplate.update(
                         "UPDATE process_sagas " +
                                 "SET status = :status, " +
-                                    "is_active = false " +
+                                    "active = false " +
                                 "WHERE id = :id",
                         Map.of(
                                 "id", id,
@@ -83,7 +83,7 @@ public class ProcessSagaPersistenceAdapter implements ProcessSagaPersistencePort
                 jdbcTemplate.update(
                         "UPDATE process_sagas " +
                                 "SET status = :status, " +
-                                    "is_active = false " +
+                                    "active = false " +
                             "WHERE order_external_id = :orderExternalId " +
                                 "AND status = :beforeStatus",
                         Map.of(
