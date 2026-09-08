@@ -1,7 +1,7 @@
 plugins {
-    id 'java'
     id 'org.jetbrains.kotlin.jvm' version '1.9.25'
     id 'org.jetbrains.kotlin.plugin.spring' version '1.9.25'
+    id 'org.jetbrains.kotlin.plugin.jpa' version '1.9.25'
     id 'org.springframework.boot' version '3.4.5'
     id 'io.spring.dependency-management' version '1.1.7'
 }
@@ -9,12 +9,6 @@ plugins {
 group = 'io.playground'
 version = '0.0.1-SNAPSHOT'
 description = 'order-service'
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
-    }
-}
 
 repositories {
     mavenCentral()
@@ -45,8 +39,6 @@ dependencies {
     implementation 'org.springframework.kafka:spring-kafka'
 
     // dev-tool
-    compileOnly 'org.projectlombok:lombok'
-    annotationProcessor 'org.projectlombok:lombok'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
 
     // monitoring
@@ -58,8 +50,6 @@ dependencies {
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testCompileOnly 'org.projectlombok:lombok'
-    testAnnotationProcessor 'org.projectlombok:lombok'
 
     // test-container
     testImplementation "org.springframework.boot:spring-boot-testcontainers"
@@ -69,8 +59,13 @@ dependencies {
 
 tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
     compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
         freeCompilerArgs.add('-Xjsr305=strict')
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 21
 }
 
 tasks.named('test') {
