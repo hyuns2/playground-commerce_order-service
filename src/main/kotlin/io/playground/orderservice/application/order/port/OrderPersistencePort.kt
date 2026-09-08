@@ -3,6 +3,7 @@ package io.playground.orderservice.application.order.port
 import io.playground.orderservice.domain.order.Order
 import java.util.Optional
 
+@JvmSuppressWildcards
 interface OrderPersistencePort {
     fun findByExternalId(externalId: String): Optional<Order>
 

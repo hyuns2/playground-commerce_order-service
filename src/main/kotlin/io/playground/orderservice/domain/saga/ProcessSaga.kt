@@ -33,6 +33,8 @@ class ProcessSaga(
         this.lockedUntil = lockedUntil
     }
 
+    fun isActive(): Boolean = active
+
     companion object {
         @JvmStatic
         fun isActiveStatus(status: ProcessSagaStatus): Boolean =

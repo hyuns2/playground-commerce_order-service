@@ -1,13 +1,18 @@
 package io.playground.orderservice.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public class BusinessDetailException extends RuntimeException {
     private final BusinessErrorCode errorCode;
     private final String detail;
+
+    public BusinessDetailException(BusinessErrorCode errorCode,
+                                   String detail) {
+        this.errorCode = errorCode;
+        this.detail = detail;
+    }
+
+    public BusinessErrorCode getErrorCode() {
+        return errorCode;
+    }
 
     @Override
     public String getMessage() {

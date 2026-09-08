@@ -216,13 +216,19 @@ class ProcessStepService(
 
     @Transactional
     fun markCompensated(saga: ProcessSaga) {
-        sagaPersistence.updateStatus(saga.id ?: return, ProcessSaga.ProcessSagaStatus.COMPENSATED)
+        sagaPersistence.updateStatus(
+            requireNotNull(saga.id) { "saga.id is required" },
+            ProcessSaga.ProcessSagaStatus.COMPENSATED,
+        )
     }
 
     @Transactional
     fun markRetryOrFail(saga: ProcessSaga, retryCount: Int) {
         if (saga.retryCount < retryCount) {
-            sagaPersistence.updateRetryCountAndLockedUntil(saga.id ?: return, null)
+            sagaPersistence.updateRetryCountAndLockedUntil(
+                requireNotNull(saga.id) { "saga.id is required" },
+                null,
+            )
             return
         }
 
@@ -277,7 +283,6 @@ class ProcessStepService(
                 )
             }
             ProcessSaga.ProcessSagaStatus.STOCKS_RESERVED,
-            ProcessSaga.ProcessSagaStatus.STARTED,
             -> {
                 orderService.failOrder(saga.orderExternalId)
                 eventProducer.produce(

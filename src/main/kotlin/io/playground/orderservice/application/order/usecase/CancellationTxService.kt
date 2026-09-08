@@ -101,7 +101,7 @@ class CancellationTxService(
             orderItem.price.multiply(
                 BigDecimal.valueOf((variantQuantities[orderItem.variantId] ?: 0).toLong()),
             )
-        }.reduce(BigDecimal.ZERO, BigDecimal::add)
+        }.fold(BigDecimal.ZERO) { acc, value -> acc.add(value) }
     }
 
     @Transactional

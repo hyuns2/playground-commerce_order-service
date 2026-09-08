@@ -3,6 +3,7 @@ package io.playground.orderservice.application.order.port
 import io.playground.orderservice.domain.order.Order
 import io.playground.orderservice.domain.order.OrderItem
 
+@JvmSuppressWildcards
 interface OrderItemPersistencePort {
     fun findAllByOrderExternalIdAndOrderStatus(
         orderExternalId: String,

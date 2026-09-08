@@ -20,6 +20,10 @@ repositories {
     mavenCentral()
 }
 
+kotlin {
+    jvmToolchain(25)
+}
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2024.0.2"

@@ -1,6 +1,5 @@
 package io.playground.orderservice.application.order.dto
 
-import java.util.Map
 import kotlin.jvm.JvmRecord
 
 class OrderDto {

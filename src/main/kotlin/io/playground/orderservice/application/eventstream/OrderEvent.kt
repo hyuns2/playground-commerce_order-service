@@ -1,7 +1,6 @@
 package io.playground.orderservice.application.eventstream
 
 import java.math.BigDecimal
-import java.util.Map
 import kotlin.jvm.JvmRecord
 
 class OrderEvent {

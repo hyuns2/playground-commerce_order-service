@@ -4,6 +4,7 @@ import io.playground.orderservice.domain.saga.ProcessSaga
 import java.time.Instant
 import java.util.Optional
 
+@JvmSuppressWildcards
 interface ProcessSagaPersistencePort {
     fun findByOrderExternalId(orderExternalId: String): Optional<ProcessSaga>
 
@@ -11,7 +12,7 @@ interface ProcessSagaPersistencePort {
 
     fun findExpiredSagas(limitSize: Int, retryCount: Int): List<ProcessSaga>
 
-    fun updateStatus(id: Long, status: ProcessSaga.ProcessSagaStatus): Boolean
+    fun updateStatus(id: Long?, status: ProcessSaga.ProcessSagaStatus): Boolean
 
     fun updateStatus(
         orderExternalId: String,
@@ -21,5 +22,5 @@ interface ProcessSagaPersistencePort {
 
     fun updatePaymentKey(orderExternalId: String, paymentKey: String): Boolean
 
-    fun updateRetryCountAndLockedUntil(id: Long, lockedUntil: Instant?): Boolean
+    fun updateRetryCountAndLockedUntil(id: Long?, lockedUntil: Instant?): Boolean
 }

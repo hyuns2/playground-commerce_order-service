@@ -45,12 +45,12 @@ class OrderService(
             OrderItem.of(
                 null,
                 order.id,
-                info.variantId(),
-                info.variantName(),
-                info.productId(),
-                info.productName(),
-                info.price(),
-                variantQuantities[info.variantId()] ?: 0,
+                info.variantId,
+                info.variantName,
+                info.productId,
+                info.productName,
+                info.price,
+                variantQuantities[info.variantId] ?: 0,
                 OrderItem.OrderItemStatus.NONE,
                 0,
                 null,
@@ -60,7 +60,7 @@ class OrderService(
 
         val totalAmount = orderItems.map { item ->
             item.price.multiply(BigDecimal.valueOf(item.quantity.toLong()))
-        }.reduce(BigDecimal.ZERO, BigDecimal::add)
+        }.fold(BigDecimal.ZERO) { acc, value -> acc.add(value) }
 
         orderAmountPersistence.save(
             OrderAmount.of(
@@ -91,17 +91,17 @@ class OrderService(
                 )
             }
 
-        if (orderAmountInfo.status() != Order.OrderStatus.CREATED) {
+        if (orderAmountInfo.status != Order.OrderStatus.CREATED) {
             throw BusinessDetailException(
                 BusinessErrorCode.ORDER_PAYMENT_FAILED,
-                "ORDER_STATUS: ${orderAmountInfo.status()}",
+                "ORDER_STATUS: ${orderAmountInfo.status}",
             )
         }
 
-        if (orderAmountInfo.finalAmount().compareTo(amount) != 0) {
+        if (orderAmountInfo.finalAmount.compareTo(amount) != 0) {
             throw BusinessDetailException(
                 BusinessErrorCode.ORDER_PAYMENT_FAILED,
-                "ORDER_AMOUNT: ${orderAmountInfo.finalAmount()}",
+                "ORDER_AMOUNT: ${orderAmountInfo.finalAmount}",
             )
         }
     }
